@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui xlsx sql serialbus serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,10 +25,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    appcore.cpp \
+    dataoper.cpp \
+    DM_Modbus.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    appcore.h \
+    connection.h \
+    dataoper.h \
+    DM_Modbus.h
 
 FORMS += \
         mainwindow.ui
+
+RESOURCES += \
+    img.qrc
+RC_ICONS=images/log11.ico

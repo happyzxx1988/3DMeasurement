@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>images/log11.ico</file>
+        <file>images/off.png</file>
+        <file>images/on.png</file>
+        <file>images/方向三角-向上.png</file>
+        <file>images/方向三角-向下.png</file>
+        <file>images/方向三角-向右.png</file>
+        <file>images/方向三角-向左.png</file>
+        <file>images/方向圆箭头-向上.png</file>
+        <file>images/方向圆箭头-向下.png</file>
+        <file>images/警告.png</file>
+        <file>images/正常.png</file>
+    </qresource>
+</RCC>
