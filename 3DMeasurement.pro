@@ -35,7 +35,8 @@ HEADERS += \
     appcore.h \
     connection.h \
     dataoper.h \
-    DM_Modbus.h
+    DM_Modbus.h \
+    objectinfo.h
 
 FORMS += \
         mainwindow.ui
