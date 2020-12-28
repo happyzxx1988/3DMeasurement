@@ -144,6 +144,12 @@ void AppCore::initDevice()
     retries506 = settings->value("Device506/Retries").toInt();
     serverId506 = settings->value("Device506/ServerId").toInt();
 
+    connectPLC502();
+    connectPLC503();
+    connectPLC504();
+    connectPLC505();
+    connectPLC506();
+
     emit infoMessage(tr("Device initialized."));
 }
 
@@ -168,25 +174,83 @@ void AppCore::connectPLC506()
     dc506.connectDevice(ip506,port506,serverId506,timeout506,retries506);
 }
 
-bool AppCore::deviceIsConnected()
+bool AppCore::deviceIsConnected502()
 {
     return dc502.isConnected();
 }
-
-void AppCore::disconnectDevice()
+void AppCore::disconnectDevice502()
 {
     dc502.disconnectDevice();
 }
 
-
-
-void AppCore::readUint16(int address_, int count_, QVector<quint16> &buffer_)
+bool AppCore::deviceIsConnected503()
 {
-//    dc.readUint16(address_,count_,buffer_);
+    return dc503.isConnected();
+}
+void AppCore::disconnectDevice503()
+{
+    dc503.disconnectDevice();
+}
+
+bool AppCore::deviceIsConnected504()
+{
+    return dc504.isConnected();
+}
+void AppCore::disconnectDevice504()
+{
+    dc504.disconnectDevice();
+}
+
+bool AppCore::deviceIsConnected505()
+{
+    return dc505.isConnected();
+}
+void AppCore::disconnectDevice505()
+{
+    dc505.disconnectDevice();
+}
+
+bool AppCore::deviceIsConnected506()
+{
+    return dc506.isConnected();
+}
+void AppCore::disconnectDevice506()
+{
+    dc506.disconnectDevice();
+}
+
+
+void AppCore::readUint16(int address_, int count_, std::vector<unsigned short> &buffer_)
+{
+    dc506.readUint16(address_,count_,buffer_);
 }
 void AppCore::readFloat32(int address_,float &buffer_)
 {
 //    dc.readFloat32(address_,buffer_);
+}
+void AppCore::readFloat32(int plcFlag,int address_,int count_,std::vector<float> &buffer_)
+{
+    switch (plcFlag) {
+    case 502:
+        dc502.readFloat32(address_,count_,buffer_);
+        break;
+    case 503:
+        dc503.readFloat32(address_,count_,buffer_);
+        break;
+    case 504:
+        dc504.readFloat32(address_,count_,buffer_);
+        break;
+    case 505:
+        dc505.readFloat32(address_,count_,buffer_);
+        break;
+    default:
+        break;
+    }
+}
+
+void AppCore::startReadData506(int address_, unsigned short &buffer_)
+{
+    dc506.readUint16(address_,buffer_);
 }
 
 

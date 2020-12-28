@@ -35,8 +35,16 @@ public slots:
 
 public:
     QSettings*          appSettings()       { return settings; }
-    bool                deviceIsConnected();
-    void                disconnectDevice();
+    bool                deviceIsConnected502();
+    void                disconnectDevice502();
+    bool                deviceIsConnected503();
+    void                disconnectDevice503();
+    bool                deviceIsConnected504();
+    void                disconnectDevice504();
+    bool                deviceIsConnected505();
+    void                disconnectDevice505();
+    bool                deviceIsConnected506();
+    void                disconnectDevice506();
     QSettings*          initSettings();
     void                initDevice();
     void connectPLC502();
@@ -45,9 +53,12 @@ public:
     void connectPLC505();
     void connectPLC506();
 
-    void readUint16(int address_, int count_, QVector<quint16> &buffer_);
+    void readUint16(int address_, int count_, std::vector<unsigned short> &buffer_);
 
     void readFloat32(int address_, float &buffer_);
+    void startReadData506(int address_, unsigned short &buffer_);
+
+    void readFloat32(int plcFlag, int address_, int count_, std::vector<float> &buffer_);//起始地址必须为偶数
 
     void sleep(unsigned int msec);
 private:

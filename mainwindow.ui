@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -22,7 +25,7 @@
     margin-top: 1ex; 
 }
 
-
+/*
 QToolButton{  
 	color:rgb(255, 255, 255);  
 	border-style:solid;  	
@@ -33,7 +36,7 @@ QToolButton{
 	background:transparent;
 	padding:1px 1px;
 }
-</string>
+*/</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -59,28 +62,28 @@ QToolButton{
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_14">
+          <widget class="QPushButton" name="alarmResetBtn">
            <property name="text">
             <string>报警复位</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_15">
+          <widget class="QPushButton" name="ZLocationBtn">
            <property name="text">
             <string>Z轴定位</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_13">
+          <widget class="QPushButton" name="servoMoveBtn">
            <property name="text">
             <string>伺服使能</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="startDetectionBtn">
            <property name="text">
             <string>开始检测</string>
            </property>
@@ -134,7 +137,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_17">
+            <widget class="QLabel" name="XCurrentVal">
              <property name="minimumSize">
               <size>
                <width>80</width>
@@ -142,7 +145,7 @@ QToolButton{
               </size>
              </property>
              <property name="text">
-              <string>100.236</string>
+              <string>00</string>
              </property>
             </widget>
            </item>
@@ -189,7 +192,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_20">
+            <widget class="QLabel" name="YCurrentVal">
              <property name="minimumSize">
               <size>
                <width>80</width>
@@ -197,7 +200,7 @@ QToolButton{
               </size>
              </property>
              <property name="text">
-              <string>100.236</string>
+              <string>00</string>
              </property>
             </widget>
            </item>
@@ -244,7 +247,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_23">
+            <widget class="QLabel" name="ZCurrentVal">
              <property name="minimumSize">
               <size>
                <width>80</width>
@@ -252,7 +255,7 @@ QToolButton{
               </size>
              </property>
              <property name="text">
-              <string>100.236</string>
+              <string>00</string>
              </property>
             </widget>
            </item>
@@ -299,7 +302,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_26">
+            <widget class="QLabel" name="MeasureCurrentVal">
              <property name="minimumSize">
               <size>
                <width>80</width>
@@ -307,7 +310,7 @@ QToolButton{
               </size>
              </property>
              <property name="text">
-              <string>100.236</string>
+              <string>00</string>
              </property>
             </widget>
            </item>
@@ -363,7 +366,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit"/>
+            <widget class="QLineEdit" name="lengthSetVal"/>
            </item>
            <item>
             <widget class="QLabel" name="label_29">
@@ -385,7 +388,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_5">
+            <widget class="QPushButton" name="lengthSetBtn">
              <property name="maximumSize">
               <size>
                <width>50</width>
@@ -421,7 +424,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_2"/>
+            <widget class="QLineEdit" name="widthSetVal"/>
            </item>
            <item>
             <widget class="QLabel" name="label_31">
@@ -443,7 +446,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_6">
+            <widget class="QPushButton" name="widthSetBtn">
              <property name="maximumSize">
               <size>
                <width>50</width>
@@ -479,7 +482,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_8"/>
+            <widget class="QLineEdit" name="thicknessSetVal"/>
            </item>
            <item>
             <widget class="QLabel" name="label_47">
@@ -501,7 +504,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_12">
+            <widget class="QPushButton" name="thicknessSetBtn">
              <property name="maximumSize">
               <size>
                <width>50</width>
@@ -537,7 +540,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_3"/>
+            <widget class="QLineEdit" name="XIntervalSetVal"/>
            </item>
            <item>
             <widget class="QLabel" name="label_33">
@@ -559,7 +562,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_7">
+            <widget class="QPushButton" name="XIntervalSetBtn">
              <property name="maximumSize">
               <size>
                <width>50</width>
@@ -595,7 +598,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_4"/>
+            <widget class="QLineEdit" name="YIntervalSetVal"/>
            </item>
            <item>
             <widget class="QLabel" name="label_35">
@@ -617,7 +620,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_8">
+            <widget class="QPushButton" name="YIntervalSetBtn">
              <property name="maximumSize">
               <size>
                <width>50</width>
@@ -662,7 +665,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_5"/>
+            <widget class="QLineEdit" name="XSpeedSetVal"/>
            </item>
            <item>
             <widget class="QLabel" name="label_37">
@@ -672,7 +675,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_9">
+            <widget class="QPushButton" name="XSpeedSetBtn">
              <property name="maximumSize">
               <size>
                <width>50</width>
@@ -708,7 +711,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_6"/>
+            <widget class="QLineEdit" name="YSpeedSetVal"/>
            </item>
            <item>
             <widget class="QLabel" name="label_39">
@@ -718,7 +721,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_10">
+            <widget class="QPushButton" name="YSpeedSetBtn">
              <property name="maximumSize">
               <size>
                <width>50</width>
@@ -754,7 +757,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_7"/>
+            <widget class="QLineEdit" name="ZSpeedSetVal"/>
            </item>
            <item>
             <widget class="QLabel" name="label_41">
@@ -764,7 +767,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_11">
+            <widget class="QPushButton" name="ZSpeedSetBtn">
              <property name="maximumSize">
               <size>
                <width>50</width>
@@ -794,7 +797,7 @@ QToolButton{
              <item>
               <layout class="QGridLayout" name="gridLayout">
                <item row="0" column="1">
-                <widget class="QToolButton" name="toolButton">
+                <widget class="QToolButton" name="YBeforeBtn">
                  <property name="text">
                   <string>...</string>
                  </property>
@@ -814,7 +817,7 @@ QToolButton{
                 </widget>
                </item>
                <item row="1" column="0">
-                <widget class="QToolButton" name="toolButton_2">
+                <widget class="QToolButton" name="XLeftBtn">
                  <property name="text">
                   <string>...</string>
                  </property>
@@ -834,7 +837,10 @@ QToolButton{
                 </widget>
                </item>
                <item row="1" column="2">
-                <widget class="QToolButton" name="toolButton_4">
+                <widget class="QToolButton" name="XRightBtn">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
                  <property name="text">
                   <string>...</string>
                  </property>
@@ -848,13 +854,16 @@ QToolButton{
                    <height>50</height>
                   </size>
                  </property>
+                 <property name="checkable">
+                  <bool>false</bool>
+                 </property>
                  <property name="autoRaise">
                   <bool>true</bool>
                  </property>
                 </widget>
                </item>
                <item row="2" column="1">
-                <widget class="QToolButton" name="toolButton_3">
+                <widget class="QToolButton" name="YAfterBtn">
                  <property name="styleSheet">
                   <string notr="true"/>
                  </property>
@@ -915,7 +924,7 @@ QToolButton{
              <item>
               <layout class="QVBoxLayout" name="verticalLayout">
                <item>
-                <widget class="QToolButton" name="toolButton_5">
+                <widget class="QToolButton" name="ZUpBtn">
                  <property name="text">
                   <string>...</string>
                  </property>
@@ -948,7 +957,7 @@ QToolButton{
                 </spacer>
                </item>
                <item>
-                <widget class="QToolButton" name="toolButton_6">
+                <widget class="QToolButton" name="ZDownBtn">
                  <property name="styleSheet">
                   <string notr="true"/>
                  </property>
@@ -1050,7 +1059,7 @@ QToolButton{
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_3">
+            <widget class="QLabel" name="probeFault">
              <property name="minimumSize">
               <size>
                <width>20</width>
@@ -1118,7 +1127,7 @@ QToolButton{
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_6">
+            <widget class="QLabel" name="XFault">
              <property name="minimumSize">
               <size>
                <width>20</width>
@@ -1160,7 +1169,7 @@ QToolButton{
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_8">
+            <widget class="QLabel" name="label_6">
              <property name="minimumSize">
               <size>
                <width>80</width>
@@ -1186,7 +1195,7 @@ QToolButton{
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_9">
+            <widget class="QLabel" name="YFault">
              <property name="minimumSize">
               <size>
                <width>20</width>
@@ -1254,7 +1263,7 @@ QToolButton{
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_12">
+            <widget class="QLabel" name="ZFault">
              <property name="minimumSize">
               <size>
                <width>20</width>
@@ -1304,7 +1313,7 @@ QToolButton{
               </size>
              </property>
              <property name="text">
-              <string>参数错误</string>
+              <string>紧急停止</string>
              </property>
             </widget>
            </item>
@@ -1322,7 +1331,7 @@ QToolButton{
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_15">
+            <widget class="QLabel" name="parameterFault">
              <property name="minimumSize">
               <size>
                <width>20</width>
@@ -1390,7 +1399,7 @@ QToolButton{
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_50">
+            <widget class="QLabel" name="ZRNOver">
              <property name="minimumSize">
               <size>
                <width>20</width>
