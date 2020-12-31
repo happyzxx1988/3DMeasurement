@@ -54,8 +54,7 @@ void DM_Modbus::connectDevice(QString port, int parity, int baud, int dataBits,
 
         ModbusDevice = new QModbusRtuSerialMaster(this);
 
-        connect(ModbusDevice, &QModbusClient::errorOccurred,
-                this, [this](QModbusDevice::Error) {
+        connect(ModbusDevice, &QModbusClient::errorOccurred, this, [this](QModbusDevice::Error) {
             emit deviceError(ModbusDevice->errorString());
         });
 

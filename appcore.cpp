@@ -253,7 +253,14 @@ void AppCore::startReadData506(int address_, unsigned short &buffer_)
     dc506.readUint16(address_,buffer_);
 }
 
-
+void AppCore::writeBool(int address, int offset, bool val)
+{
+    dc506.writeBool(address,offset,val);
+}
+void AppCore::writeFloat32(int address, float value)
+{
+    dc506.writeFloat32(address,value);
+}
 
 //以毫秒为单位的延时函数
 void AppCore::sleep(unsigned int msec)

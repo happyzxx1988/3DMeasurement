@@ -17,8 +17,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-private slots:
-    void on_startDetectionBtn_clicked();
 
 private:
     void init();
@@ -31,6 +29,8 @@ private:
     QVector<bool> dec2BinTrans(unsigned int data);
     void int_to_float(quint16 a,quint16 b, float &buffer_,QString analyticalModel_ = "ABCD");
     void toolButtonClick();
+    void pushButtonClick();
+    void startDetectionBtn_clicked();
 
 private:
     Ui::MainWindow *ui;

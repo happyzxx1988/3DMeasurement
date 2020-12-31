@@ -60,6 +60,9 @@ public:
 
     void readFloat32(int plcFlag, int address_, int count_, std::vector<float> &buffer_);//起始地址必须为偶数
 
+    void writeBool(int address, int offset, bool val);
+    void writeFloat32(int address, float value);
+
     void sleep(unsigned int msec);
 private:
     QSettings*          settings;
