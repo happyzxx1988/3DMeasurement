@@ -5,6 +5,10 @@
 #include <appcore.h>
 #include <dataoper.h>
 #include <QTimer>
+#include <QtXlsx>
+#include <QTime>
+#include <QFile>
+#include <QFileDialog>
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +21,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void  closeEvent(QCloseEvent *event);
 
 private:
     void init();
@@ -39,16 +44,18 @@ private:
     AppCore appcore;
     DataOper dataOper;
     QTimer timer;
-
     bool isDetectioniing;
-
     std::vector<float> buffer502;
     std::vector<float> buffer503;
     std::vector<float> buffer504;
     std::vector<float> buffer505;
     std::vector<unsigned short> buffer506;
-
     int XCol;
+    bool isMeasureOver;
+    bool isExportSuccess;
+
+    QXlsx::Document xlsx;
+    QXlsx::Format format; //格式化对象
 
 
 };

@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,20 +17,31 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    if(timer.isActive()){
-        timer.stop();
-    }
-    appcore.disconnectDevice502();
-    appcore.disconnectDevice503();
-    appcore.disconnectDevice504();
-    appcore.disconnectDevice505();
-    appcore.disconnectDevice506();
+//    if(timer.isActive()){
+//        timer.stop();
+//    }
+//    if(appcore.deviceIsConnected502())
+//        appcore.disconnectDevice502();
+//    if(appcore.deviceIsConnected503())
+//        appcore.disconnectDevice503();
+//    if(appcore.deviceIsConnected504())
+//        appcore.disconnectDevice504();
+//    if(appcore.deviceIsConnected505())
+//        appcore.disconnectDevice505();
+//    if(appcore.deviceIsConnected506())
+//        appcore.disconnectDevice506();
+//    QProcess *process = new QProcess;
+//    process->start("taskkill", QStringList() << "/f" << "/im" << "3DMeasurement.exe");
     delete ui;
 }
 void MainWindow::parameterInit()
 {
     isDetectioniing = true;
     XCol = 1;
+    isMeasureOver = true;
+    isExportSuccess = false;
+    ui->tableWidget ->horizontalHeader() ->setSectionResizeMode( QHeaderView::Fixed );
+    ui->tableWidget ->verticalHeader() ->setSectionResizeMode( QHeaderView::Fixed );
 }
 void MainWindow::init()
 {
@@ -39,7 +51,6 @@ void MainWindow::init()
     lockUiOperation();
 
     connect(&timer,&QTimer::timeout,this,&MainWindow::startReadData);
-//    timer.start(100);
 
     connect(&dataOper, &DataOper::sendDataMessage, this, [this](const QString& info){
         QMessageBox::information(this, tr("提示"), info,tr("确定"));
@@ -108,7 +119,7 @@ void MainWindow::init()
         std::vector<unsigned short> buffer;
         appcore.readUint16(19,16,buffer);
         startReadInitData(buffer);
-        timer.start(100);
+        timer.start(1000);
     });
     connect(&appcore, &AppCore::deviceDisconnected506, this, [this](){
         qDebug() << "emit deviceDisconnected506";
@@ -215,7 +226,47 @@ void MainWindow::pushButtonClick()
             appcore.writeFloat32(33,ui->ZSpeedSetVal->text().toFloat());
         }
     } else if (objName == "exportBtn") {//导出Excel
+        if(!isDetectioniing){
+            QMessageBox::information(this,"提示","正在测量，不能导出，请先停止测量","确定");
+            return;
+        }
+        QString location = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);//桌面路径
+        QString fileName;
+        QFile file;
 
+        fileName = QFileDialog::getSaveFileName(this, "导出Excel文件",location,"Files (*.xlsx)");
+        if(fileName.isEmpty()){
+            return;
+        }
+        file.setFileName(fileName);
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text)){
+            QMessageBox::information(this,"提示","导出文件失败","确定");
+            return;
+        }
+        //写入Excel
+        xlsx.mergeCells("B1:D1", format);//合并单元格
+        xlsx.write(1, 1, "测量时间:");
+        xlsx.write(2, 1, "Z轴坐标:");
+        xlsx.write(3, 1, "长宽厚:");
+        xlsx.write(4, 1, "采样间距:");
+        xlsx.write(5, 1, "XYV值:");
+        xlsx.write(4, 3, "采样频率:");
+
+        xlsx.write(1,2, ui->tableWidget->item(0,1)->text());
+
+        xlsx.write(2,2, ui->ZCurrentVal->text().toFloat());
+        xlsx.write(3,2, ui->lengthSetVal->text().toFloat());
+        xlsx.write(3,3, ui->widthSetVal->text().toFloat());
+        xlsx.write(3,4, ui->thicknessSetVal->text().toFloat());
+        xlsx.write(4,2, ui->YIntervalSetVal->text().toFloat());
+        xlsx.write(4,4, ui->XIntervalSetVal->text().toFloat());
+
+        isExportSuccess = xlsx.saveAs(fileName);
+        if(isExportSuccess){
+            QMessageBox::information(this, "导出数据成功", QString("信息已保存在：%1！").arg(fileName),"确定");
+        }else{
+            QMessageBox::information(this, "提示", "导出文件失败","确定");
+        }
     }
 }
 //开始检测按钮
@@ -251,7 +302,10 @@ void MainWindow::startReadData()
         appcore.readUint16(0,9,buffer506);
     }
     if(!isDetectioniing){//开始检测
-        startMeasureData();
+        if(isMeasureOver){
+            isMeasureOver = false;
+            startMeasureData();
+        }
     }
 }
 //程序启动506读取一次初始参数，用于显示
@@ -407,32 +461,47 @@ void MainWindow::startMeasureData()
             break;
         }
     }
-
 }
 //开始处理拿到的数据
 void MainWindow::startDealWithMeasureData()
 {
     //给实时数据表格显示固定数据
+    int size502 = buffer502.size();
+    int size503 = buffer503.size();
+    int size504 = buffer504.size();
+    int size505 = buffer505.size();
+
     ui->tableWidget->setItem(1,1,new QTableWidgetItem(ui->ZCurrentVal->text()));//Z轴坐标
     ui->tableWidget->setItem(2,1,new QTableWidgetItem(ui->lengthSetVal->text()));//长
     ui->tableWidget->setItem(2,2,new QTableWidgetItem(ui->widthSetVal->text()));//宽
     ui->tableWidget->setItem(2,3,new QTableWidgetItem(ui->thicknessSetVal->text()));//厚
     ui->tableWidget->setItem(3,1,new QTableWidgetItem(ui->YIntervalSetVal->text()));//采样间距
     ui->tableWidget->setItem(3,3,new QTableWidgetItem(ui->XIntervalSetVal->text()));//采样频率
-    qDebug() << buffer502.size() << ":" << buffer503.size() << ":" << buffer504.size() << ":" << buffer505.size();
-    if(buffer502.size() == 1000 && buffer503.size() == 1 && buffer504.size() == 1000 && buffer505.size() == 1){
+
+    qDebug() << size502 << ":" << size503 << ":" << size504 << ":" << size505;
+    if(size502 == 1000 && size503 == 1 && size504 == 1000 && size505 == 1){
         ui->tableWidget->setItem(4,XCol,new QTableWidgetItem(ui->XCurrentVal->text()));//X轴值   4行 动态列
-        for(int i = 5; i<buffer504.size(); i++){
-            for(int j = XCol; j<buffer504.size(); j++){
-                ui->tableWidget->setItem(i,0,new QTableWidgetItem(ui->YCurrentVal->text()));//Y轴值   4行
-                ui->tableWidget->setItem(i,XCol,new QTableWidgetItem(ui->MeasureCurrentVal->text()));//测量值   4行
-            }
+        xlsx.write(5,XCol+1, ui->XCurrentVal->text().toFloat());
+        for(int i = 5; i<size504+5; i++){
+//            for(int j = XCol; j<size504; j++){
+//                QTableWidgetItem *item = ui->tableWidget->item(i,0);
+//                if(item){
+//                    delete item;
+//                    ui->tableWidget->setItem(i,0,new QTableWidgetItem(ui->YCurrentVal->text()));//Y轴值   4行
+//                }else{
+//                    ui->tableWidget->setItem(i,0,new QTableWidgetItem(ui->YCurrentVal->text()));//Y轴值   4行
+//                }
+            ui->tableWidget->setItem(i,0,new QTableWidgetItem(ui->YCurrentVal->text()));//Y轴值   4行
+            ui->tableWidget->setItem(i,XCol,new QTableWidgetItem(ui->MeasureCurrentVal->text()));//测量值   4行
+            xlsx.write(i+1,1, ui->YCurrentVal->text().toFloat());
+            xlsx.write(i+1,XCol+1, ui->MeasureCurrentVal->text().toFloat());
+//            }
         }
         //处理完一次，即采集完毕发送采集接受信号，同时移动X轴下一列
         appcore.writeBool(41, 12, true);
         XCol = XCol + 1;
+        isMeasureOver = true;
     }
-
 }
 
 
@@ -526,4 +595,22 @@ void MainWindow::int_to_float(quint16 a,quint16 b, float &buffer_,QString analyt
     {
         *pTemp=((chTemp[2]<<24)&0xff000000)|((chTemp[3]<<16)&0xff0000)|((chTemp[0]<<8)&0xff00)|(chTemp[1]&0xff);
     }
+}
+
+//窗口关闭事件
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if(timer.isActive()){
+        timer.stop();
+    }
+    if(appcore.deviceIsConnected502())
+        appcore.disconnectDevice502();
+    if(appcore.deviceIsConnected503())
+        appcore.disconnectDevice503();
+    if(appcore.deviceIsConnected504())
+        appcore.disconnectDevice504();
+    if(appcore.deviceIsConnected505())
+        appcore.disconnectDevice505();
+    if(appcore.deviceIsConnected506())
+        appcore.disconnectDevice506();
 }
