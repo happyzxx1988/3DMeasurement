@@ -555,6 +555,12 @@ void DM_Modbus::readUint16(int address_, int count_, std::vector<unsigned short>
             connect(this, &DM_Modbus::readUint16Signal_D,&loop, &QEventLoop::quit);
             loop.exec();
         }
+//        else
+//        {
+//            QEventLoop loop;
+//            connect(this, &DM_Modbus::deviceError,&loop, &QEventLoop::quit);
+//            loop.exec();
+//        }
     }
 }
 
@@ -663,8 +669,10 @@ void DM_Modbus::readFloat32(int address_, int count_, std::vector<float> &buffer
                 }
                 buffer_.push_back(fTemp);
             }
+//            qDebug() << 11;
             emit readFloat32Signal_D();
         });
+//        qDebug() << 22;
         if (ModbusDevice)
         {
             QEventLoop loop;
@@ -672,6 +680,13 @@ void DM_Modbus::readFloat32(int address_, int count_, std::vector<float> &buffer
             connect(this, &DM_Modbus::readFloat32Signal_D,&loop, &QEventLoop::quit);
             loop.exec();
         }
+//        qDebug() << 33;
+//        else
+//        {
+//            QEventLoop loop;
+//            connect(this, &DM_Modbus::deviceError,&loop, &QEventLoop::quit);
+//            loop.exec();
+//        }
     }
 }
 
