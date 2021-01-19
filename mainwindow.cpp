@@ -17,21 +17,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-//    if(timer.isActive()){
-//        timer.stop();
-//    }
-//    if(appcore.deviceIsConnected502())
-//        appcore.disconnectDevice502();
-//    if(appcore.deviceIsConnected503())
-//        appcore.disconnectDevice503();
-//    if(appcore.deviceIsConnected504())
-//        appcore.disconnectDevice504();
-//    if(appcore.deviceIsConnected505())
-//        appcore.disconnectDevice505();
-//    if(appcore.deviceIsConnected506())
-//        appcore.disconnectDevice506();
-//    QProcess *process = new QProcess;
-//    process->start("taskkill", QStringList() << "/f" << "/im" << "3DMeasurement.exe");
     delete ui;
 }
 void MainWindow::parameterInit()
@@ -40,8 +25,19 @@ void MainWindow::parameterInit()
     XCol = 1;
     isMeasureOver = true;
     isExportSuccess = false;
-    ui->tableWidget ->horizontalHeader() ->setSectionResizeMode( QHeaderView::Fixed );
-    ui->tableWidget ->verticalHeader() ->setSectionResizeMode( QHeaderView::Fixed );
+    isServoMoveBtn = true;
+
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode( QHeaderView::Fixed );
+    ui->tableWidget->verticalHeader()->setSectionResizeMode( QHeaderView::Fixed );
+
+    ui->lengthSetBtn->hide();
+    ui->widthSetBtn->hide();
+    ui->thicknessSetBtn->hide();
+    ui->XIntervalSetBtn->hide();
+    ui->YIntervalSetBtn->hide();
+    ui->XSpeedSetBtn->hide();
+    ui->YSpeedSetBtn->hide();
+    ui->ZSpeedSetBtn->hide();
 }
 void MainWindow::init()
 {
@@ -135,20 +131,30 @@ void MainWindow::initToolBtn()
 {
     QList<QToolButton *> btns = this->findChildren<QToolButton *>();
     foreach (QToolButton * btn, btns) {
-        connect(btn, &QToolButton::clicked, this, &MainWindow::toolButtonClick);
+//        connect(btn, &QToolButton::clicked, this, &MainWindow::toolButtonClick);
+        connect(btn, &QToolButton::pressed, this, &MainWindow::toolButtonPressed);
+        connect(btn, &QToolButton::released, this, &MainWindow::toolButtonReleased);
     }
 
     QList<QPushButton *> btns1 = this->findChildren<QPushButton *>();
     foreach (QPushButton * btn, btns1) {
         connect(btn, &QPushButton::clicked, this, &MainWindow::pushButtonClick);
+        connect(btn, &QPushButton::pressed, this, &MainWindow::pushButtonPressed);
+        connect(btn, &QPushButton::released, this, &MainWindow::pushButtonReleased);
     }
+
+    QList<QLineEdit *> edits = this->findChildren<QLineEdit *>();
+    foreach (QLineEdit * edit, edits) {
+        connect(edit, &QLineEdit::returnPressed, this, &MainWindow::lineEditReturnPressed);
+    }
+
 }
 
 void MainWindow::toolButtonClick()
 {
     QToolButton *btn = (QToolButton *)sender();
     QString objName = btn->objectName();
-    qDebug() << "toolBtn objName:" << objName;
+    qDebug() << "toolButtonClick objName:" << objName;
     if (objName == "XLeftBtn") {
         appcore.writeBool(41, 4, true);
     } else if (objName == "XRightBtn") {
@@ -163,18 +169,66 @@ void MainWindow::toolButtonClick()
         appcore.writeBool(41, 9, true);
     }
 }
+void MainWindow::toolButtonPressed()
+{
+    QToolButton *btn = (QToolButton *)sender();
+    QString objName = btn->objectName();
+    qDebug() << "toolButtonPressed objName:" << objName;
+    if (objName == "XLeftBtn") {
+        appcore.writeBool(41, 5, true);
+    } else if (objName == "XRightBtn") {
+        appcore.writeBool(41, 4, true);
+    } else if (objName == "YBeforeBtn") {
+        appcore.writeBool(41, 6, true);
+    } else if (objName == "YAfterBtn") {
+        appcore.writeBool(41, 7, true);
+    } else if (objName == "ZUpBtn") {
+        appcore.writeBool(41, 8, true);
+    } else if (objName == "ZDownBtn") {
+        appcore.writeBool(41, 9, true);
+    }
+}
+void MainWindow::toolButtonReleased()
+{
+    QToolButton *btn = (QToolButton *)sender();
+    QString objName = btn->objectName();
+    qDebug() << "toolButtonReleased objName:" << objName;
+    if (objName == "XLeftBtn") {
+        appcore.writeBool(41, 5, false);
+    } else if (objName == "XRightBtn") {
+        appcore.writeBool(41, 4, false);
+    } else if (objName == "YBeforeBtn") {
+        appcore.writeBool(41, 6, false);
+    } else if (objName == "YAfterBtn") {
+        appcore.writeBool(41, 7, false);
+    } else if (objName == "ZUpBtn") {
+        appcore.writeBool(41, 8, false);
+    } else if (objName == "ZDownBtn") {
+        appcore.writeBool(41, 9, false);
+    }
+}
+
 void MainWindow::pushButtonClick()
 {
     QPushButton *btn = (QPushButton *)sender();
     QString objName = btn->objectName();
-    qDebug() << "pushBtn objName:" << objName;
+    qDebug() << "pushButtonClick objName:" << objName;
 
     if (objName == "alarmResetBtn") {//报警复位
-        appcore.writeBool(41, 3, true);
     } else if (objName == "ZLocationBtn") {//Z轴定位
         appcore.writeBool(41, 10, true);
+    } else if (objName == "backZeroBtn") {//回零
+        appcore.writeBool(41, 1, true);
     } else if (objName == "servoMoveBtn") {//伺服使能
-        appcore.writeBool(41, 2, true);
+        if(isServoMoveBtn){
+            isServoMoveBtn = false;
+            ui->servoMoveBtn->setText("禁用轴");
+            appcore.writeBool(41, 2, true);
+        }else{
+            isServoMoveBtn = true;
+            ui->servoMoveBtn->setText("启用轴");
+            appcore.writeBool(41, 2, false);
+        }
     } else if (objName == "startDetectionBtn") {//开始检测
         startDetectionBtn_clicked();
     } else if (objName == "lengthSetBtn") {//长度设置
@@ -183,13 +237,13 @@ void MainWindow::pushButtonClick()
         }else{
             appcore.writeFloat32(19,ui->lengthSetVal->text().toFloat());
         }
-    } else if (objName == "widthSetBtn") {//厚度设置
+    } else if (objName == "widthSetBtn") {//宽度设置
         if(ui->widthSetVal->text().isEmpty()){
             QMessageBox::information(this, "提示", "输入工件宽度值","确定");
         }else{
             appcore.writeFloat32(21,ui->widthSetVal->text().toFloat());
         }
-    } else if (objName == "thicknessSetBtn") {//宽度设置
+    } else if (objName == "thicknessSetBtn") {//厚度设置
         if(ui->thicknessSetVal->text().isEmpty()){
             QMessageBox::information(this, "提示", "输入工件厚度值","确定");
         }else{
@@ -248,24 +302,155 @@ void MainWindow::pushButtonClick()
         xlsx.write(1, 1, "测量时间:");
         xlsx.write(2, 1, "Z轴坐标:");
         xlsx.write(3, 1, "长宽厚:");
-        xlsx.write(4, 1, "采样间距:");
+        xlsx.write(4, 1, "扫描间距(X):");
         xlsx.write(5, 1, "XYV值:");
-        xlsx.write(4, 3, "采样频率:");
+        xlsx.write(4, 3, "采样间距(Y):");
 
-        xlsx.write(1,2, ui->tableWidget->item(0,1)->text());
+        if(ui->tableWidget->item(0,1)==NULL|| (ui->tableWidget->item(0,1)&& ui->tableWidget->item(0,1)->text()=="")){
+            xlsx.write(1,2, "");
+        }else{
+            xlsx.write(1,2, ui->tableWidget->item(0,1)->text());
+        }
+        if(ui->tableWidget->item(1,1)==NULL|| (ui->tableWidget->item(1,1)&& ui->tableWidget->item(1,1)->text()=="")){
+            xlsx.write(2,2, 0);
+        }else{
+            xlsx.write(2,2, ui->tableWidget->item(1,1)->text().toFloat());
+        }
+        if(ui->tableWidget->item(2,1)==NULL|| (ui->tableWidget->item(2,1)&& ui->tableWidget->item(2,1)->text()=="")){
+            xlsx.write(3,2, 0);
+        }else{
+            xlsx.write(3,2, ui->tableWidget->item(2,1)->text().toFloat());
+        }
 
-        xlsx.write(2,2, ui->ZCurrentVal->text().toFloat());
-        xlsx.write(3,2, ui->lengthSetVal->text().toFloat());
-        xlsx.write(3,3, ui->widthSetVal->text().toFloat());
-        xlsx.write(3,4, ui->thicknessSetVal->text().toFloat());
-        xlsx.write(4,2, ui->YIntervalSetVal->text().toFloat());
-        xlsx.write(4,4, ui->XIntervalSetVal->text().toFloat());
+        if(ui->tableWidget->item(2,2)==NULL|| (ui->tableWidget->item(2,2)&& ui->tableWidget->item(2,2)->text()=="")){
+            xlsx.write(3,3, 0);
+        }else{
+            xlsx.write(3,3, ui->tableWidget->item(2,2)->text().toFloat());
+        }
+        if(ui->tableWidget->item(2,3)==NULL|| (ui->tableWidget->item(2,3)&& ui->tableWidget->item(2,3)->text()=="")){
+            xlsx.write(3,4, 0);
+        }else{
+            xlsx.write(3,4, ui->tableWidget->item(2,3)->text().toFloat());
+        }
+        if(ui->tableWidget->item(3,1)==NULL|| (ui->tableWidget->item(3,1)&& ui->tableWidget->item(3,1)->text()=="")){
+            xlsx.write(4,2, 0);
+        }else{
+            xlsx.write(4,2, ui->tableWidget->item(3,1)->text().toFloat());
+        }
+        if(ui->tableWidget->item(3,3)==NULL|| (ui->tableWidget->item(3,3)&& ui->tableWidget->item(3,3)->text()=="")){
+            xlsx.write(4,4, 0);
+        }else{
+            xlsx.write(4,4, ui->tableWidget->item(3,3)->text().toFloat());
+        }
+
+
+
 
         isExportSuccess = xlsx.saveAs(fileName);
         if(isExportSuccess){
             QMessageBox::information(this, "导出数据成功", QString("信息已保存在：%1！").arg(fileName),"确定");
         }else{
             QMessageBox::information(this, "提示", "导出文件失败","确定");
+        }
+    }
+}
+void MainWindow::pushButtonPressed()
+{
+    QPushButton *btn = (QPushButton *)sender();
+    QString objName = btn->objectName();
+    qDebug() << "pushButtonPressed objName:" << objName;
+
+    if (objName == "alarmResetBtn") {//报警复位
+        appcore.writeBool(41, 3, true);
+    } else if (objName == "ZLocationBtn") {//Z轴定位
+    } else if (objName == "servoMoveBtn") {//伺服使能
+    } else if (objName == "startDetectionBtn") {//开始检测
+    } else if (objName == "lengthSetBtn") {//长度设置
+    } else if (objName == "widthSetBtn") {//厚度设置
+    } else if (objName == "thicknessSetBtn") {//宽度设置
+    } else if (objName == "XIntervalSetBtn") {//扫描间距X
+    } else if (objName == "YIntervalSetBtn") {//采样间距Y
+    } else if (objName == "XSpeedSetBtn") {//X轴速度
+    } else if (objName == "YSpeedSetBtn") {//Y轴速度
+    } else if (objName == "ZSpeedSetBtn") {//Z轴速度
+    } else if (objName == "exportBtn") {//导出Excel
+    }
+}
+void MainWindow::pushButtonReleased()
+{
+    QPushButton *btn = (QPushButton *)sender();
+    QString objName = btn->objectName();
+    qDebug() << "pushButtonReleased objName:" << objName;
+
+    if (objName == "alarmResetBtn") {//报警复位
+        appcore.writeBool(41, 3, false);
+    } else if (objName == "ZLocationBtn") {//Z轴定位
+    } else if (objName == "servoMoveBtn") {//伺服使能
+    } else if (objName == "startDetectionBtn") {//开始检测
+    } else if (objName == "lengthSetBtn") {//长度设置
+    } else if (objName == "widthSetBtn") {//厚度设置
+    } else if (objName == "thicknessSetBtn") {//宽度设置
+    } else if (objName == "XIntervalSetBtn") {//扫描间距X
+    } else if (objName == "YIntervalSetBtn") {//采样间距Y
+    } else if (objName == "XSpeedSetBtn") {//X轴速度
+    } else if (objName == "YSpeedSetBtn") {//Y轴速度
+    } else if (objName == "ZSpeedSetBtn") {//Z轴速度
+    } else if (objName == "exportBtn") {//导出Excel
+    }
+}
+
+void MainWindow::lineEditReturnPressed()
+{
+    QLineEdit *eidt = (QLineEdit *)sender();
+    QString objName = eidt->objectName();
+    qDebug() << "lineEditReturnPressed objName:" << objName;
+    if (objName == "lengthSetVal") {
+        if(ui->lengthSetVal->text().isEmpty()){
+            QMessageBox::information(this, "提示", "输入工件长度值","确定");
+        }else{
+            appcore.writeFloat32(19,ui->lengthSetVal->text().toFloat());
+        }
+    } else if (objName == "widthSetVal") {
+        if(ui->widthSetVal->text().isEmpty()){
+            QMessageBox::information(this, "提示", "输入工件宽度值","确定");
+        }else{
+            appcore.writeFloat32(21,ui->widthSetVal->text().toFloat());
+        }
+    } else if (objName == "thicknessSetVal") {
+        if(ui->thicknessSetVal->text().isEmpty()){
+            QMessageBox::information(this, "提示", "输入工件厚度值","确定");
+        }else{
+            appcore.writeFloat32(23,ui->thicknessSetVal->text().toFloat());
+        }
+    } else if (objName == "XIntervalSetVal") {
+        if(ui->XIntervalSetVal->text().isEmpty()){
+            QMessageBox::information(this, "提示", "输入扫描间距（X）","确定");
+        }else{
+            appcore.writeFloat32(25,ui->XIntervalSetVal->text().toFloat());
+        }
+    } else if (objName == "YIntervalSetVal") {
+        if(ui->YIntervalSetVal->text().isEmpty()){
+            QMessageBox::information(this, "提示", "输入采样间距（Y）","确定");
+        }else{
+            appcore.writeFloat32(27,ui->YIntervalSetVal->text().toFloat());
+        }
+    } else if (objName == "XSpeedSetVal") {
+        if(ui->XSpeedSetVal->text().isEmpty()){
+            QMessageBox::information(this, "提示", "输入X轴速度","确定");
+        }else{
+            appcore.writeFloat32(29,ui->XSpeedSetVal->text().toFloat());
+        }
+    } else if (objName == "YSpeedSetVal") {
+        if(ui->YSpeedSetVal->text().isEmpty()){
+            QMessageBox::information(this, "提示", "输入Y轴速度","确定");
+        }else{
+            appcore.writeFloat32(31,ui->YSpeedSetVal->text().toFloat());
+        }
+    } else if (objName == "ZSpeedSetVal") {
+        if(ui->ZSpeedSetVal->text().isEmpty()){
+            QMessageBox::information(this, "提示", "输入Z轴速度","确定");
+        }else{
+            appcore.writeFloat32(33,ui->ZSpeedSetVal->text().toFloat());
         }
     }
 }
@@ -293,19 +478,98 @@ void MainWindow::startDetectionBtn_clicked()
 //程序启动定时读取所有需要读取的数据
 void MainWindow::startReadData()
 {
+    float measureCurrentVal;
+    float XCurrentVal;
+    float YCurrentVal;
+    float ZCurrentVal;
+
     if(appcore.deviceIsConnected502() && appcore.deviceIsConnected503() &&
             appcore.deviceIsConnected504() && appcore.deviceIsConnected505() && appcore.deviceIsConnected506()){
-        appcore.readFloat32(502,0,1000,buffer502);//测量值
+        appcore.readFloat32(502,0,400,buffer502);//测量值
         appcore.readFloat32(503,0,1,buffer503);//X坐标值
-        appcore.readFloat32(504,0,1000,buffer504);//Y轴坐标值
+        appcore.readFloat32(504,0,400,buffer504);//Y轴坐标值
         appcore.readFloat32(505,0,1,buffer505);//Z轴坐标值
         appcore.readUint16(0,9,buffer506);
+        //启动显示报警信息，显示当前测量值、X、Y、Z值
+        int buffer506Size = buffer506.size();
+        if(buffer506Size == 9){
+            for(int i = 0; i < buffer506Size; i = i+2){
+                switch (i) {
+                case 0:
+                    int_to_float(buffer506.at(i), buffer506.at(i+1), measureCurrentVal);
+                    break;
+                case 2:
+                    int_to_float(buffer506.at(i), buffer506.at(i+1), XCurrentVal);
+                    break;
+                case 4:
+                    int_to_float(buffer506.at(i), buffer506.at(i+1), YCurrentVal);
+                    break;
+                case 6:
+                    int_to_float(buffer506.at(i), buffer506.at(i+1), ZCurrentVal);
+                    break;
+                default:
+                    break;
+                }
+            }
+            ui->XCurrentVal->setText(QString::number(XCurrentVal,'f',2));
+            ui->YCurrentVal->setText(QString::number(YCurrentVal,'f',2));
+            ui->ZCurrentVal->setText(QString::number(ZCurrentVal,'f',2));
+            ui->MeasureCurrentVal->setText(QString::number(measureCurrentVal,'f',2));
+            /*报警信息*/
+            /*解析4008号寄存器*/
+            QVector<bool> intParse = dec2BinTrans(buffer506.at(8));
+            for(int i = 0; i < 16; i++){
+                switch (i) {
+                case 0:
+                    if(intParse.at(i)){
+                        ui->ZRNOver->setPixmap(QPixmap(":/img/images/正常.png"));
+                    }else{
+                        ui->ZRNOver->setPixmap(QPixmap(":/img/images/警告.png"));
+                    }
+                    break;
+                case 1:
+                    if(intParse.at(i)){
+                        ui->XFault->setPixmap(QPixmap(":/img/images/正常.png"));
+                    }else{
+                        ui->XFault->setPixmap(QPixmap(":/img/images/警告.png"));
+                    }
+                    break;
+                case 2:
+                    if(intParse.at(i)){
+                        ui->YFault->setPixmap(QPixmap(":/img/images/正常.png"));
+                    }else{
+                        ui->YFault->setPixmap(QPixmap(":/img/images/警告.png"));
+                    }
+                    break;
+                case 3:
+                    if(intParse.at(i)){
+                        ui->ZFault->setPixmap(QPixmap(":/img/images/正常.png"));
+                    }else{
+                        ui->ZFault->setPixmap(QPixmap(":/img/images/警告.png"));
+                    }
+                    break;
+                case 4:
+                    if(intParse.at(i)){
+                        ui->probeFault->setPixmap(QPixmap(":/img/images/正常.png"));
+                    }else{
+                        ui->probeFault->setPixmap(QPixmap(":/img/images/警告.png"));
+                    }
+                    break;
+                case 7:
+                    if(intParse.at(i)){
+                        ui->emergencyStop->setPixmap(QPixmap(":/img/images/正常.png"));
+                    }else{
+                        ui->emergencyStop->setPixmap(QPixmap(":/img/images/警告.png"));
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
     }
     if(!isDetectioniing){//开始检测
-        if(isMeasureOver){
-            isMeasureOver = false;
-            startMeasureData();
-        }
+        startMeasureData();
     }
 }
 //程序启动506读取一次初始参数，用于显示
@@ -365,97 +629,30 @@ void MainWindow::startReadInitData(std::vector<unsigned short> buffer)
 //定时测量函数
 void MainWindow::startMeasureData()
 {
-    float measureCurrentVal;
-    float XCurrentVal;
-    float YCurrentVal;
-    float ZCurrentVal;
-
     int buffer506Size = buffer506.size();
+    qDebug() << "buffer506Size:" << buffer506Size;
     if(buffer506Size != 9){
         return;
     }
-    qDebug() << "buffer506Size:" << buffer506Size;
-    for(int i = 0; i < buffer506Size; i = i+2){
-        switch (i) {
-        case 0:
-            int_to_float(buffer506.at(i), buffer506.at(i+1), measureCurrentVal);
-            break;
-        case 2:
-            int_to_float(buffer506.at(i), buffer506.at(i+1), XCurrentVal);
-            break;
-        case 4:
-            int_to_float(buffer506.at(i), buffer506.at(i+1), YCurrentVal);
-            break;
-        case 6:
-            int_to_float(buffer506.at(i), buffer506.at(i+1), ZCurrentVal);
-            break;
-        default:
-            break;
-        }
-    }
-    ui->XCurrentVal->setText(QString::number(XCurrentVal,'f',2));
-    ui->YCurrentVal->setText(QString::number(YCurrentVal,'f',2));
-    ui->ZCurrentVal->setText(QString::number(ZCurrentVal,'f',2));
-    ui->MeasureCurrentVal->setText(QString::number(measureCurrentVal,'f',2));
-
-
     /*解析4008号寄存器*/
     QVector<bool> intParse = dec2BinTrans(buffer506.at(8));
+
+    qDebug() << intParse;
+
     for(int i = 0; i < 16; i++){
         switch (i) {
-        case 0:
-            if(intParse.at(i)){
-                ui->ZRNOver->setPixmap(QPixmap(":/img/images/正常.png"));
-            }else{
-                ui->ZRNOver->setPixmap(QPixmap(":/img/images/警告.png"));
-            }
-            break;
-        case 1:
-            if(intParse.at(i)){
-                ui->XFault->setPixmap(QPixmap(":/img/images/正常.png"));
-            }else{
-                ui->XFault->setPixmap(QPixmap(":/img/images/警告.png"));
-            }
-            break;
-        case 2:
-            if(intParse.at(i)){
-                ui->YFault->setPixmap(QPixmap(":/img/images/正常.png"));
-            }else{
-                ui->YFault->setPixmap(QPixmap(":/img/images/警告.png"));
-            }
-            break;
-        case 3:
-            if(intParse.at(i)){
-                ui->ZFault->setPixmap(QPixmap(":/img/images/正常.png"));
-            }else{
-                ui->ZFault->setPixmap(QPixmap(":/img/images/警告.png"));
-            }
-            break;
-        case 4:
-            if(intParse.at(i)){
-                ui->probeFault->setPixmap(QPixmap(":/img/images/正常.png"));
-            }else{
-                ui->probeFault->setPixmap(QPixmap(":/img/images/警告.png"));
-            }
-            break;
-        case 5:
-
-            break;
-        case 6:
-
-            break;
-        case 7:
-            if(intParse.at(i)){
-                ui->parameterFault->setPixmap(QPixmap(":/img/images/正常.png"));
-            }else{
-                ui->parameterFault->setPixmap(QPixmap(":/img/images/警告.png"));
-            }
-            break;
         case 8:
-            startDealWithMeasureData();
+            if(intParse.at(i)){
+                if(isMeasureOver){
+                    isMeasureOver = false;
+                    startDealWithMeasureData();
+                }
+            }
             break;
-        case 9:
-
+        case 9://测量完毕，模拟点击停止测量按钮
+            if(intParse.at(i)){
+                startDetectionBtn_clicked();
+            }
             break;
         default:
             break;
@@ -470,32 +667,23 @@ void MainWindow::startDealWithMeasureData()
     int size503 = buffer503.size();
     int size504 = buffer504.size();
     int size505 = buffer505.size();
-
-    ui->tableWidget->setItem(1,1,new QTableWidgetItem(ui->ZCurrentVal->text()));//Z轴坐标
-    ui->tableWidget->setItem(2,1,new QTableWidgetItem(ui->lengthSetVal->text()));//长
-    ui->tableWidget->setItem(2,2,new QTableWidgetItem(ui->widthSetVal->text()));//宽
-    ui->tableWidget->setItem(2,3,new QTableWidgetItem(ui->thicknessSetVal->text()));//厚
-    ui->tableWidget->setItem(3,1,new QTableWidgetItem(ui->YIntervalSetVal->text()));//采样间距
-    ui->tableWidget->setItem(3,3,new QTableWidgetItem(ui->XIntervalSetVal->text()));//采样频率
-
     qDebug() << size502 << ":" << size503 << ":" << size504 << ":" << size505;
-    if(size502 == 1000 && size503 == 1 && size504 == 1000 && size505 == 1){
-        ui->tableWidget->setItem(4,XCol,new QTableWidgetItem(ui->XCurrentVal->text()));//X轴值   4行 动态列
-        xlsx.write(5,XCol+1, ui->XCurrentVal->text().toFloat());
+
+    if(size502 == 400 && size503 == 1 && size504 == 400 && size505 == 1){
+        ui->tableWidget->setItem(1,1,new QTableWidgetItem(QString::number(buffer505.at(0))));//Z轴坐标
+        ui->tableWidget->setItem(2,1,new QTableWidgetItem(ui->lengthSetVal->text()));//长
+        ui->tableWidget->setItem(2,2,new QTableWidgetItem(ui->widthSetVal->text()));//宽
+        ui->tableWidget->setItem(2,3,new QTableWidgetItem(ui->thicknessSetVal->text()));//厚
+        ui->tableWidget->setItem(3,1,new QTableWidgetItem(ui->XIntervalSetVal->text()));//扫描间距(X)
+        ui->tableWidget->setItem(3,3,new QTableWidgetItem(ui->YIntervalSetVal->text()));//采样间距(Y)
+        ui->tableWidget->setItem(4,XCol,new QTableWidgetItem(QString::number(buffer503.at(0))));//X轴值   4行 动态列
+
+        xlsx.write(5,XCol+1, buffer503.at(0));
         for(int i = 5; i<size504+5; i++){
-//            for(int j = XCol; j<size504; j++){
-//                QTableWidgetItem *item = ui->tableWidget->item(i,0);
-//                if(item){
-//                    delete item;
-//                    ui->tableWidget->setItem(i,0,new QTableWidgetItem(ui->YCurrentVal->text()));//Y轴值   4行
-//                }else{
-//                    ui->tableWidget->setItem(i,0,new QTableWidgetItem(ui->YCurrentVal->text()));//Y轴值   4行
-//                }
-            ui->tableWidget->setItem(i,0,new QTableWidgetItem(ui->YCurrentVal->text()));//Y轴值   4行
-            ui->tableWidget->setItem(i,XCol,new QTableWidgetItem(ui->MeasureCurrentVal->text()));//测量值   4行
-            xlsx.write(i+1,1, ui->YCurrentVal->text().toFloat());
-            xlsx.write(i+1,XCol+1, ui->MeasureCurrentVal->text().toFloat());
-//            }
+            ui->tableWidget->setItem(i,0,new QTableWidgetItem(QString::number(buffer504.at(i-5))));//Y轴值   4行
+            ui->tableWidget->setItem(i,XCol,new QTableWidgetItem(QString::number(buffer502.at(i-5))));//测量值   4行
+            xlsx.write(i+1,1, buffer504.at(i-5));
+            xlsx.write(i+1,XCol+1, buffer502.at(i-5));
         }
         //处理完一次，即采集完毕发送采集接受信号，同时移动X轴下一列
         appcore.writeBool(41, 12, true);
@@ -507,6 +695,7 @@ void MainWindow::startDealWithMeasureData()
 
 void MainWindow::unlockUiOperation()
 {
+    ui->backZeroBtn->setEnabled(true);
     ui->alarmResetBtn->setEnabled(true);
     ui->ZLocationBtn->setEnabled(true);
     ui->servoMoveBtn->setEnabled(true);
@@ -527,12 +716,23 @@ void MainWindow::unlockUiOperation()
     ui->XSpeedSetBtn->setEnabled(true);
     ui->YSpeedSetBtn->setEnabled(true);
     ui->ZSpeedSetBtn->setEnabled(true);
+    /*参数设置 - 输入框*/
+    ui->lengthSetVal->setEnabled(true);
+    ui->widthSetVal->setEnabled(true);
+    ui->thicknessSetVal->setEnabled(true);
+    ui->XIntervalSetVal->setEnabled(true);
+    ui->YIntervalSetVal->setEnabled(true);
+    ui->XSpeedSetVal->setEnabled(true);
+    ui->YSpeedSetVal->setEnabled(true);
+    ui->ZSpeedSetVal->setEnabled(true);
+
     /**/
     ui->exportBtn->setEnabled(true);
 
 }
 void MainWindow::lockUiOperation()
 {
+    ui->backZeroBtn->setEnabled(false);
     ui->alarmResetBtn->setEnabled(false);
     ui->ZLocationBtn->setEnabled(false);
     ui->servoMoveBtn->setEnabled(false);
@@ -553,6 +753,15 @@ void MainWindow::lockUiOperation()
     ui->XSpeedSetBtn->setEnabled(false);
     ui->YSpeedSetBtn->setEnabled(false);
     ui->ZSpeedSetBtn->setEnabled(false);
+    /*参数设置 - 输入框*/
+    ui->lengthSetVal->setEnabled(false);
+    ui->widthSetVal->setEnabled(false);
+    ui->thicknessSetVal->setEnabled(false);
+    ui->XIntervalSetVal->setEnabled(false);
+    ui->YIntervalSetVal->setEnabled(false);
+    ui->XSpeedSetVal->setEnabled(false);
+    ui->YSpeedSetVal->setEnabled(false);
+    ui->ZSpeedSetVal->setEnabled(false);
     /**/
     ui->exportBtn->setEnabled(false);
 }
@@ -614,3 +823,4 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if(appcore.deviceIsConnected506())
         appcore.disconnectDevice506();
 }
+

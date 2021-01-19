@@ -506,6 +506,7 @@ void DM_Modbus::writeBool(int address_, int offset_, bool b_, std::function<void
 {
     unsigned short buffer;
     readUint16(address_,buffer);
+    offset_ = offset_>= 8 ? offset_- 8 : offset_ + 8;
     if(b_)
         buffer|=(1<<offset_);
     else

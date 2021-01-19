@@ -21,7 +21,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void  closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event);
 
 private:
     void init();
@@ -35,7 +35,12 @@ private:
     QVector<bool> dec2BinTrans(unsigned int data);
     void int_to_float(quint16 a,quint16 b, float &buffer_,QString analyticalModel_ = "ABCD");
     void toolButtonClick();
+    void toolButtonPressed();
+    void toolButtonReleased();
     void pushButtonClick();
+    void pushButtonPressed();
+    void pushButtonReleased();
+    void lineEditReturnPressed();
     void startDetectionBtn_clicked();
     void startDealWithMeasureData();
 
@@ -53,6 +58,8 @@ private:
     int XCol;
     bool isMeasureOver;
     bool isExportSuccess;
+
+    bool isServoMoveBtn;//是否伺服使能
 
     QXlsx::Document xlsx;
     QXlsx::Format format; //格式化对象
