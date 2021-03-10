@@ -9,6 +9,7 @@
 #include <QTime>
 #include <QFile>
 #include <QFileDialog>
+#include "syssetwidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -23,6 +24,9 @@ public:
     ~MainWindow();
     void closeEvent(QCloseEvent *event);
 
+private slots:
+    void on_SYSAction_triggered();
+
 private:
     void init();
     void parameterInit();
@@ -33,6 +37,7 @@ private:
     void lockUiOperation();
     void unlockUiOperation();
     QVector<bool> dec2BinTrans(unsigned int data);
+    QVector<bool> dec2BinTrans2(unsigned int data);
     void int_to_float(quint16 a,quint16 b, float &buffer_,QString analyticalModel_ = "ABCD");
     void toolButtonClick();
     void toolButtonPressed();
@@ -43,6 +48,7 @@ private:
     void lineEditReturnPressed();
     void startDetectionBtn_clicked();
     void startDealWithMeasureData();
+    void clearTable();
 
 private:
     Ui::MainWindow *ui;
@@ -63,6 +69,10 @@ private:
 
     QXlsx::Document xlsx;
     QXlsx::Format format; //格式化对象
+
+    int measureNum;//测量值个数
+
+    SysSetWidget *sysSetWidget;
 
 
 };

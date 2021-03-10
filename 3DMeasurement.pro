@@ -28,7 +28,8 @@ SOURCES += \
         mainwindow.cpp \
     appcore.cpp \
     dataoper.cpp \
-    DM_Modbus.cpp
+    DM_Modbus.cpp \
+    syssetwidget.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -36,10 +37,12 @@ HEADERS += \
     connection.h \
     dataoper.h \
     DM_Modbus.h \
-    objectinfo.h
+    objectinfo.h \
+    syssetwidget.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    syssetwidget.ui
 
 RESOURCES += \
     img.qrc

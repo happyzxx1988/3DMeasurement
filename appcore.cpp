@@ -261,6 +261,10 @@ void AppCore::writeFloat32(int address, float value)
 {
     dc506.writeFloat32(address,value);
 }
+void AppCore::writeFloat32(int address, std::vector<float> values)
+{
+    dc506.writeFloat32(address,values);
+}
 
 //以毫秒为单位的延时函数
 void AppCore::sleep(unsigned int msec)

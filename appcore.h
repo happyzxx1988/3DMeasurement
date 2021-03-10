@@ -62,6 +62,7 @@ public:
 
     void writeBool(int address, int offset, bool val);
     void writeFloat32(int address, float value);
+    void writeFloat32(int address, std::vector<float> values);
 
     void sleep(unsigned int msec);
 private:
